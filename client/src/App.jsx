@@ -2,8 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import MentorshipProgram from './pages/MentorshipProgram';
 import Dashboard from './pages/Dashboard';
 import ResetPassword from './pages/ResetPassword';
-import Rankings from './pages/Rankings';
-import TopperPredictor from './pages/TopperPredictor';
+import Leaderboard from './pages/Leaderboard';
 import './App.css';
 
 function App() {
@@ -14,8 +13,7 @@ function App() {
         <div className="nav-links">
           <Link to="/mentorship-program">Program</Link>
           <Link to="/dashboard">Dashboard</Link>
-          <Link to="/rankings">Rankings</Link>
-          <Link to="/topper-predictor">Predictor</Link>
+          <Link to="/leaderboard">Leaderboard</Link>
         </div>
       </nav>
       <Routes>
@@ -23,8 +21,7 @@ function App() {
         <Route path="/mentorship-program" element={<MentorshipProgram />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/rankings" element={<Rankings />} />
-        <Route path="/topper-predictor" element={<TopperPredictor />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </Router>
   );

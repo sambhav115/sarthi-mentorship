@@ -141,10 +141,20 @@ router.post('/summarize-all', async (req, res) => {
   }
 });
 
-// ─── GET /api/ai/rankings — rank all students by performance ───
-router.get('/rankings', async (req, res) => {
+// ─── GET /api/ai/leaderboard — rank all students by performance ───
+router.get('/leaderboard', async (req, res) => {
   try {
-    const students = await Student.find({ status: 'active' });
+    const { search, targetYear } = req.query;
+    const filter = { status: 'active' };
+    if (targetYear) filter.targetYear = targetYear;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const students = await Student.find(filter);
     const rankings = [];
 
     for (const student of students) {
@@ -159,7 +169,9 @@ router.get('/rankings', async (req, res) => {
           avgRating: 0,
           totalSessions: 0,
           trend: 'none',
+          trendValue: 0,
           latestRating: 0,
+          lastReviewDate: null,
           score: 0,
         });
         continue;
@@ -169,6 +181,7 @@ router.get('/rankings', async (req, res) => {
       const avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
       const latestRating = ratings[ratings.length - 1];
       const totalSessions = reviews.length;
+      const lastReviewDate = reviews[reviews.length - 1].createdAt;
 
       // Trend: compare first half avg vs second half avg
       const mid = Math.floor(ratings.length / 2);
@@ -176,13 +189,13 @@ router.get('/rankings', async (req, res) => {
       const secondHalf = ratings.slice(mid);
       const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
       const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-      const trendValue = secondAvg - firstAvg;
+      const trendValue = Math.round((secondAvg - firstAvg) * 100) / 100;
       const trend = trendValue > 0.3 ? 'improving' : trendValue < -0.3 ? 'declining' : 'stable';
 
       // Score formula: normalized to 100
       const score = Math.round(
         (avgRating / 5 * 40) +
-        (Math.min(totalSessions, 10) / 10 * 20) +
+        (Math.min(totalSessions, 21) / 21 * 20) +
         (Math.max(Math.min(trendValue, 2), -2) + 2) / 4 * 20 +
         (latestRating / 5 * 20)
       );
@@ -195,7 +208,9 @@ router.get('/rankings', async (req, res) => {
         avgRating: Math.round(avgRating * 10) / 10,
         totalSessions,
         trend,
+        trendValue,
         latestRating,
+        lastReviewDate,
         score,
       });
     }
@@ -206,7 +221,7 @@ router.get('/rankings', async (req, res) => {
     // Add rank
     rankings.forEach((r, i) => { r.rank = i + 1; });
 
-    res.json({ rankings, total: rankings.length });
+    res.json({ leaderboard: rankings, total: rankings.length });
   } catch (err) {
     console.error('Rankings error:', err.message);
     res.status(500).json({ error: 'Failed to generate rankings' });

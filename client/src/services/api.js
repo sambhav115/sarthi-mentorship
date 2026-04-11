@@ -37,7 +37,6 @@ export const getLatestReview = (studentId) => API.get(`/reviews/latest/${student
 // AI
 export const summarizeReview = (reviewText) => API.post('/ai/summarize', { reviewText });
 export const summarizeAll = (studentId) => API.post('/ai/summarize-all', { studentId });
-export const getRankings = () => API.get('/ai/rankings');
-export const getTopperPrediction = (targetYear) => API.post('/ai/topper-predictor', { targetYear });
+export const getLeaderboard = (params) => API.get('/ai/leaderboard', { params });
 
 export default API;
