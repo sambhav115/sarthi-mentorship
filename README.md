@@ -26,13 +26,48 @@ sarthi/
 └── docs/            # Data cleaning report, code refactor, system design
 ```
 
-## Setup & Run
+## Quick Start with Docker
+
+The easiest way to run the entire project (no installations needed except Docker):
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/sambhav115/sarthi-mentorship.git
+cd sarthi-mentorship
+
+# 2. Set up environment variables
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# 3. Run everything
+docker compose up --build
+```
+
+That's it! Open **http://localhost:3000** in your browser.
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:5000/api |
+| MongoDB | mongodb://localhost:27017/sarthi |
+
+To stop: `docker compose down`
+To stop and delete data: `docker compose down -v`
+
+### Default Mentor Credentials
+- `ananya@sarthi.com` / `12345`
+- `rajesh@sarthi.com` / `12345`
+
+---
+
+## Manual Setup (without Docker)
+
+Requires: Node.js 18+, MongoDB running locally.
 
 ### Backend
 ```bash
 cd server
 npm install
-cp .env.example .env  # Add your GEMINI_API_KEY
 npm run dev
 ```
 
