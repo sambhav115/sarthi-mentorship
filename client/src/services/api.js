@@ -20,7 +20,7 @@ export const forgotPassword = (email) => API.post('/auth/forgot-password', { ema
 export const resetPassword = (token, newPassword) => API.post('/auth/reset-password', { token, newPassword });
 
 // Students
-export const getStudents = () => API.get('/students');
+export const getStudents = (search) => API.get('/students', { params: search ? { search } : {} });
 export const getStudent = (id) => API.get(`/students/${id}`);
 
 // Mentors
@@ -37,5 +37,7 @@ export const getLatestReview = (studentId) => API.get(`/reviews/latest/${student
 // AI
 export const summarizeReview = (reviewText) => API.post('/ai/summarize', { reviewText });
 export const summarizeAll = (studentId) => API.post('/ai/summarize-all', { studentId });
+export const getRankings = () => API.get('/ai/rankings');
+export const getTopperPrediction = (targetYear) => API.post('/ai/topper-predictor', { targetYear });
 
 export default API;

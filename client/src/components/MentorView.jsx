@@ -8,6 +8,7 @@ function MentorView() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [pastReviews, setPastReviews] = useState([]);
@@ -151,8 +152,22 @@ function MentorView() {
       </div>
 
       <h3>Students</h3>
+      <input
+        type="text"
+        placeholder="Search students by name or email..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{
+          width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
+          borderRadius: '8px', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-h)',
+          marginBottom: '16px', outline: 'none', boxSizing: 'border-box',
+        }}
+      />
       <div className="students-grid">
-        {students.map(student => (
+        {students.filter(s =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.email.toLowerCase().includes(searchQuery.toLowerCase())
+        ).map(student => (
           <div
             className="student-card"
             key={student.id}

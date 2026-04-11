@@ -11,6 +11,7 @@ function StudentView() {
 
   const [aiSummary, setAiSummary] = useState(null);
   const [summarizing, setSummarizing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -78,9 +79,23 @@ function StudentView() {
   return (
     <div className="progress-section">
       <div className="student-select-section">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '8px',
+            fontSize: '16px', background: 'var(--bg)', color: 'var(--text-h)',
+            marginBottom: '12px', width: '100%', maxWidth: '300px', outline: 'none', boxSizing: 'border-box',
+          }}
+        />
+        <br />
         <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
           <option value="">Select your profile</option>
-          {students.map(s => (
+          {students.filter(s =>
+            s.name.toLowerCase().includes(searchQuery.toLowerCase())
+          ).map(s => (
             <option key={s.id} value={s.id}>{s.name} ({s.id})</option>
           ))}
         </select>
