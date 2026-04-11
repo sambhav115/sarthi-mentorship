@@ -1,0 +1,64 @@
+{
+  "status": "success",
+  "timestamp": "04-04-2026 10:30 AM",
+  "meta": {
+    "page": 1,
+    "limit": 100,
+    "unusedField": "remove_this"
+  },
+  "students": [
+    {
+      "id": "stu_001",
+      "name": "Rahul Sharma",
+      "email": "rahul@example.com",
+      "created_at": "2026/04/01",
+      "createdAt": "01-04-2026",
+      "status": "active"
+    },
+    {
+      "id": "stu_001",
+      "name": "Rahul Sharma",
+      "email": "rahul@example.com",
+      "created_at": "April 1, 2026",
+      "status": "active"
+    },
+    {
+      "id": "stu_002",
+      "name": "Priya Patel",
+      "email": "priya@example.com",
+      "created_at": "2026/04/02",
+      "createdAt": "02-04-2026",
+      "status": "active"
+    },
+    {
+      "id": "stu_003",
+      "name": "Amit Kumar",
+      "email": "amit@example.com",
+      "created_at": "March 28, 2026",
+      "createdAt": "28-03-2026",
+      "status": "inactive"
+    },
+    {
+      "id": "stu_002",
+      "name": "Priya Patel",
+      "email": "priya@example.com",
+      "created_at": "April 2, 2026",
+      "status": "active"
+    },
+    {
+      "id": "stu_004",
+      "name": "Sneha Reddy",
+      "email": "sneha@example.com",
+      "created_at": "2026/04/03",
+      "status": "active"
+    },
+    {
+      "id": "stu_005",
+      "name": "Vikram Singh",
+      "email": "vikram@example.com",
+      "created_at": "2026/03/30",
+      "createdAt": "30-03-2026",
+      "status": "active"
+    }
+  ]
+}
