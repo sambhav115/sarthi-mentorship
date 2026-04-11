@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import MentorshipProgram from './pages/MentorshipProgram';
 import Dashboard from './pages/Dashboard';
+import ResetPassword from './pages/ResetPassword';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<MentorshipProgram />} />
         <Route path="/mentorship-program" element={<MentorshipProgram />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

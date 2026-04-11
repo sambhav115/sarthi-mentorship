@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getStudents, getMentors, getReviews, submitReview, summarizeAll } from '../services/api';
+import { getStudents, getReviews, submitReview, summarizeAll, getMe } from '../services/api';
+import MentorLogin from './MentorLogin';
 
 function MentorView() {
-  const [mentors, setMentors] = useState([]);
-  const [selectedMentor, setSelectedMentor] = useState(null);
+  const [mentor, setMentor] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,20 +20,45 @@ function MentorView() {
   const [aiSummary, setAiSummary] = useState(null);
   const [summarizing, setSummarizing] = useState(false);
 
+  // Check if already logged in
   useEffect(() => {
-    const fetchData = async () => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('mentor_token');
+      if (token) {
+        try {
+          const res = await getMe();
+          setMentor(res.data.mentor);
+        } catch {
+          localStorage.removeItem('mentor_token');
+        }
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, []);
+
+  // Fetch students once logged in
+  useEffect(() => {
+    if (!mentor) return;
+    const fetchStudents = async () => {
+      setLoading(true);
       try {
-        const [studentsRes, mentorsRes] = await Promise.all([getStudents(), getMentors()]);
-        setStudents(studentsRes.data.students);
-        setMentors(mentorsRes.data.mentors);
+        const res = await getStudents();
+        setStudents(res.data.students);
       } catch {
-        setError('Failed to load data. Please try again.');
+        setError('Failed to load students.');
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    fetchStudents();
+  }, [mentor]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('mentor_token');
+    setMentor(null);
+    setSelectedStudent(null);
+  };
 
   const selectStudent = async (student) => {
     setSelectedStudent(student);
@@ -61,12 +87,11 @@ function MentorView() {
     try {
       const res = await submitReview({
         studentId: selectedStudent.id,
-        mentorId: selectedMentor.id,
+        mentorId: mentor.id,
         ...reviewForm,
       });
       setSubmitMsg({ type: 'success', text: res.data.message });
       setReviewForm({ rating: 0, comment: '' });
-      // Refresh past reviews
       const reviewsRes = await getReviews(selectedStudent.id);
       setPastReviews(reviewsRes.data.reviews);
     } catch (err) {
@@ -89,6 +114,16 @@ function MentorView() {
     }
   };
 
+  // Wait for auth check
+  if (!authChecked) {
+    return <div className="skeleton card" style={{ maxWidth: '400px', margin: '40px auto' }} />;
+  }
+
+  // Not logged in — show login form
+  if (!mentor) {
+    return <MentorLogin onLogin={setMentor} />;
+  }
+
   if (loading) {
     return (
       <div className="students-grid">
@@ -106,36 +141,12 @@ function MentorView() {
     );
   }
 
-  // Step 1: Select mentor
-  if (!selectedMentor) {
-    return (
-      <div>
-        <h2 style={{ textAlign: 'center' }}>Select Your Profile</h2>
-        <div className="students-grid" style={{ maxWidth: '500px', margin: '0 auto' }}>
-          {mentors.map(mentor => (
-            <div
-              className="student-card"
-              key={mentor.id}
-              style={{ cursor: 'pointer' }}
-              onClick={() => setSelectedMentor(mentor)}
-            >
-              <h3>{mentor.name}</h3>
-              <p className="email">{mentor.email}</p>
-              <span className="status active">Mentor</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Step 2: Show students + review flow
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0 }}>Logged in as: {selectedMentor.name}</h2>
-        <button className="role-btn" onClick={() => { setSelectedMentor(null); setSelectedStudent(null); }}>
-          Switch Mentor
+        <h2 style={{ margin: 0 }}>Welcome, {mentor.name}</h2>
+        <button className="role-btn" onClick={handleLogout}>
+          Logout
         </button>
       </div>
 
@@ -160,7 +171,6 @@ function MentorView() {
 
       {selectedStudent && (
         <div style={{ marginTop: '32px' }}>
-          {/* Past Reviews */}
           <h3>Session History for {selectedStudent.name}</h3>
 
           {pastLoading ? (
@@ -214,7 +224,6 @@ function MentorView() {
             </>
           )}
 
-          {/* New Review Form */}
           <div className="review-form-container" style={{ marginTop: '24px' }}>
             <h3>New Session Review — Session #{pastReviews.length + 1}</h3>
             <form className="review-form" onSubmit={handleReviewSubmit}>

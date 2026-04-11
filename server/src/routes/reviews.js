@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
-
-// Hardcoded mentors
-const mentors = [
-  { id: 'mentor_001', name: 'Dr. Ananya Gupta', email: 'ananya@sarthi.com' },
-  { id: 'mentor_002', name: 'Prof. Rajesh Iyer', email: 'rajesh@sarthi.com' },
-];
+const authRouter = require('./auth');
 
 // In-memory store
 const reviews = [];
 
-// GET /api/reviews/mentors — list all mentors
+// GET /api/reviews/mentors — list all mentors (public info only)
 router.get('/mentors', (req, res) => {
+  const mentors = authRouter.getMentors().map(m => ({
+    id: m.id,
+    name: m.name,
+    email: m.email,
+  }));
   res.json({ mentors });
 });
 
@@ -27,6 +27,7 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'Rating must be between 1 and 5' });
   }
 
+  const mentors = authRouter.getMentors();
   const mentor = mentors.find(m => m.id === mentorId);
   if (!mentor) {
     return res.status(400).json({ error: 'Invalid mentorId' });
