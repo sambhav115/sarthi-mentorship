@@ -1,7 +1,7 @@
 const express = require('express');
 const OpenAI = require('openai');
 const router = express.Router();
-const reviewsRouter = require('./reviews');
+const Review = require('../models/Review');
 
 // POST /api/ai/summarize — generate AI summary of a single review
 router.post('/summarize', async (req, res) => {
@@ -65,10 +65,7 @@ router.post('/summarize-all', async (req, res) => {
     return res.status(400).json({ error: 'studentId is required' });
   }
 
-  const allReviews = reviewsRouter.getReviews();
-  const studentReviews = allReviews
-    .filter(r => r.studentId === studentId)
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const studentReviews = await Review.find({ studentId }).sort({ createdAt: 1 });
 
   if (studentReviews.length === 0) {
     return res.status(404).json({ error: 'No reviews found for this student' });

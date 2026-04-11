@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-
-// In-memory store (replace with DB in production)
-const leads = [];
+const Lead = require('../models/Lead');
 
 // POST /api/leads — submit mentorship program form
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, email, phone, targetYear } = req.body;
 
   if (!name || !email || !phone || !targetYear) {
@@ -22,22 +20,22 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'Phone must be 10 digits' });
   }
 
-  const lead = {
-    id: `lead_${Date.now()}`,
-    name,
-    email,
-    phone,
-    targetYear,
-    createdAt: new Date().toISOString(),
-  };
-
-  leads.push(lead);
-  res.status(201).json({ message: 'Registration successful', lead });
+  try {
+    const lead = await Lead.create({ name, email, phone, targetYear });
+    res.status(201).json({ message: 'Registration successful', lead });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save registration' });
+  }
 });
 
-// GET /api/leads — get all leads (for internal use)
-router.get('/', (req, res) => {
-  res.json({ leads, total: leads.length });
+// GET /api/leads — get all leads
+router.get('/', async (req, res) => {
+  try {
+    const leads = await Lead.find().sort({ createdAt: -1 });
+    res.json({ leads, total: leads.length });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch leads' });
+  }
 });
 
 module.exports = router;

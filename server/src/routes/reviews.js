@@ -1,22 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const authRouter = require('./auth');
-
-// In-memory store
-const reviews = [];
+const Review = require('../models/Review');
+const Mentor = require('../models/Mentor');
 
 // GET /api/reviews/mentors — list all mentors (public info only)
-router.get('/mentors', (req, res) => {
-  const mentors = authRouter.getMentors().map(m => ({
-    id: m.id,
-    name: m.name,
-    email: m.email,
-  }));
-  res.json({ mentors });
+router.get('/mentors', async (req, res) => {
+  try {
+    const mentors = await Mentor.find({}, 'mentorId name email');
+    res.json({ mentors: mentors.map(m => ({ id: m.mentorId, name: m.name, email: m.email })) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch mentors' });
+  }
 });
 
 // POST /api/reviews — mentor submits a session review
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { studentId, mentorId, rating, comment } = req.body;
 
   if (!studentId || !mentorId || !rating || !comment) {
@@ -27,59 +25,57 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'Rating must be between 1 and 5' });
   }
 
-  const mentors = authRouter.getMentors();
-  const mentor = mentors.find(m => m.id === mentorId);
-  if (!mentor) {
-    return res.status(400).json({ error: 'Invalid mentorId' });
+  try {
+    const mentor = await Mentor.findOne({ mentorId });
+    if (!mentor) {
+      return res.status(400).json({ error: 'Invalid mentorId' });
+    }
+
+    // Auto-increment session number per student
+    const sessionCount = await Review.countDocuments({ studentId });
+    const sessionNumber = sessionCount + 1;
+
+    const review = await Review.create({
+      studentId,
+      mentorId,
+      mentorName: mentor.name,
+      sessionNumber,
+      rating: Number(rating),
+      comment,
+    });
+
+    res.status(201).json({ message: `Session #${sessionNumber} review submitted`, review });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to submit review' });
   }
-
-  // Auto-increment session number per student
-  const studentReviews = reviews.filter(r => r.studentId === studentId);
-  const sessionNumber = studentReviews.length + 1;
-
-  const review = {
-    id: `rev_${Date.now()}`,
-    studentId,
-    mentorId,
-    mentorName: mentor.name,
-    sessionNumber,
-    rating: Number(rating),
-    comment,
-    createdAt: new Date().toISOString(),
-  };
-
-  reviews.push(review);
-  res.status(201).json({ message: `Session #${sessionNumber} review submitted`, review });
 });
 
 // GET /api/reviews?studentId=stu_001 — get reviews for a student (chronological)
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { studentId } = req.query;
 
-  if (studentId) {
-    const studentReviews = reviews
-      .filter(r => r.studentId === studentId)
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    return res.json({ reviews: studentReviews, total: studentReviews.length });
+  try {
+    const filter = studentId ? { studentId } : {};
+    const reviews = await Review.find(filter).sort({ createdAt: 1 });
+    res.json({ reviews, total: reviews.length });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
-
-  res.json({ reviews, total: reviews.length });
 });
 
 // GET /api/reviews/latest/:studentId — get the latest review for a student
-router.get('/latest/:studentId', (req, res) => {
-  const studentReviews = reviews
-    .filter(r => r.studentId === req.params.studentId)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+router.get('/latest/:studentId', async (req, res) => {
+  try {
+    const review = await Review.findOne({ studentId: req.params.studentId }).sort({ createdAt: -1 });
 
-  if (studentReviews.length === 0) {
-    return res.status(404).json({ error: 'No reviews found for this student' });
+    if (!review) {
+      return res.status(404).json({ error: 'No reviews found for this student' });
+    }
+
+    res.json(review);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch review' });
   }
-
-  res.json(studentReviews[0]);
 });
-
-// Export reviews array so ai.js can access it
-router.getReviews = () => reviews;
 
 module.exports = router;

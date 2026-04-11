@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 require('dotenv').config();
 
+const connectDB = require('./config/db');
 const studentsRouter = require('./routes/students');
 const leadsRouter = require('./routes/leads');
 const reviewsRouter = require('./routes/reviews');
@@ -31,11 +31,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Note: Frontend is deployed separately on Vercel
-// No static file serving needed here
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Connect to MongoDB then start server
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB:', err.message);
+    process.exit(1);
+  });
 
 module.exports = app;
