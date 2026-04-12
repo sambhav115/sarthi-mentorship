@@ -31,16 +31,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Connect to MongoDB then start server
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Failed to connect to MongoDB:', err.message);
-    process.exit(1);
+// Start server FIRST (so Render detects the port), then connect MongoDB
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  connectDB().catch((err) => {
+    console.error('MongoDB connection error:', err.message);
   });
+});
 
 module.exports = app;
