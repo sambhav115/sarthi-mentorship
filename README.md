@@ -4,9 +4,9 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 
 ## Live Demo
 
-- **Frontend**: https://sarthi-mentorship.vercel.app
-- **Backend**: https://sarthi-mentorship.onrender.com
-- **Mentor Login**: `ananya@sarthi.com` / `12345`
+- **Frontend**: https://sarrthi-mentorship.vercel.app
+- **Backend**: https://sarrthi-mentorship.onrender.com
+- **Mentor Login**: `ananya@sarrthi.com` / `12345`
 
 ## Tech Stack
 
@@ -20,7 +20,7 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 ## Project Structure
 
 ```
-sarthi/
+sarrthi/
 ├── server/              # Express API
 │   └── src/
 │       ├── config/      # PostgreSQL connection + seeding
