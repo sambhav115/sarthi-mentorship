@@ -7,6 +7,7 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 - **Frontend**: https://sarrthi-mentorship.vercel.app
 - **Backend**: https://sarrthi-mentorship.onrender.com
 - **Mentor Login**: `ananya@sarrthi.com` / `12345`
+- **Student Login**: any student email from dataset / `12345` (e.g. `dhruv.rajan@example.com`)
 
 ## Tech Stack
 
