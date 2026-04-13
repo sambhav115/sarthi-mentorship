@@ -4,8 +4,13 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 
 ## Live Demo
 
-- **Frontend**: https://sarrthi-mentorship.vercel.app
-- **Backend**: https://sarthi-mentorship.onrender.com
+| Service | URL |
+|---------|-----|
+| Frontend | https://sarrthi-mentorship.vercel.app |
+| Backend | https://sarthi-mentorship.onrender.com |
+| Leads | https://sarthi-mentorship.onrender.com/leads |
+| Students | https://sarthi-mentorship.onrender.com/students |
+
 - **Mentor Login**: `ananya@sarrthi.com` / `12345`
 - **Student Login**: any student email from dataset / `12345` (e.g. `dhruv.rajan@example.com`)
 
@@ -66,12 +71,8 @@ Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 | POST | /leads | Submit mentorship signup form |
 | GET | /leads | Get all leads |
 | POST | /auth/login | Mentor login (returns JWT) |
-| GET | /auth/me | Get current logged-in mentor |
 | POST | /auth/student/login | Student login (returns JWT) |
-| GET | /auth/student/me | Get current logged-in student |
-| GET | /reviews/mentors | List all mentors |
 | POST | /reviews | Submit a session review |
-| GET | /reviews?studentId=X | Get reviews for a student |
 | POST | /ai/summarize-all | AI summary of all reviews for a student |
 | GET | /ai/leaderboard | Student leaderboard ranked by performance |
 | GET | /health | Health check |
