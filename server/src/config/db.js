@@ -124,8 +124,7 @@ async function connectDB() {
   // Create tables
   await p.query(`
     CREATE TABLE IF NOT EXISTS mentors (
-      id SERIAL PRIMARY KEY,
-      mentor_id VARCHAR(50) UNIQUE NOT NULL,
+      mentor_id VARCHAR(50) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
       password VARCHAR(200) NOT NULL,
@@ -135,8 +134,7 @@ async function connectDB() {
       updated_at TIMESTAMP DEFAULT NOW()
     );
     CREATE TABLE IF NOT EXISTS students (
-      id SERIAL PRIMARY KEY,
-      student_id VARCHAR(50) UNIQUE NOT NULL,
+      student_id VARCHAR(50) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) NOT NULL,
       status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
@@ -146,7 +144,7 @@ async function connectDB() {
     );
     CREATE TABLE IF NOT EXISTS reviews (
       id SERIAL PRIMARY KEY,
-      student_id VARCHAR(50) NOT NULL,
+      student_id VARCHAR(50) NOT NULL REFERENCES students(student_id),
       mentor_id VARCHAR(50) NOT NULL,
       mentor_name VARCHAR(100) NOT NULL,
       session_number INTEGER NOT NULL,
