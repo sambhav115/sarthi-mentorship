@@ -27,41 +27,6 @@ cd client && npm run dev
 
 ---
 
-## Docker
-
-### Build and Run Everything
-```bash
-docker compose up --build
-```
-
-### Run in Background
-```bash
-docker compose up --build -d
-```
-
-### Stop
-```bash
-docker compose down
-```
-
-### Stop and Delete All Data
-```bash
-docker compose down -v
-```
-
-### View Logs
-```bash
-docker compose logs -f
-```
-
-### Rebuild Single Service
-```bash
-docker compose up --build server
-docker compose up --build client
-```
-
----
-
 ## API Endpoints (Test with curl)
 
 ### Health Check
