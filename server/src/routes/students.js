@@ -1,7 +1,29 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const { getPool } = require('../config/db');
 const { cleanStudentData } = require('../utils/dataCleaner');
+
+const CLEAN_DATA_PATH = path.join(__dirname, '../data/clean-data.json');
+
+// Save full clean dataset from DB to local JSON file
+async function saveCleanDataLocally(pool) {
+  const { rows } = await pool.query('SELECT student_id, name, email, status, target_year, created_at FROM students ORDER BY student_id ASC');
+  const cleanData = {
+    students: rows.map(s => ({
+      id: s.student_id,
+      name: s.name,
+      email: s.email,
+      status: s.status,
+      targetYear: s.target_year,
+      createdAt: s.created_at,
+    })),
+    meta: { total: rows.length, exportedAt: new Date().toISOString() },
+  };
+  fs.writeFileSync(CLEAN_DATA_PATH, JSON.stringify(cleanData, null, 2));
+  return cleanData;
+}
 
 // GET /students?search=rahul&status=active
 router.get('/', async (req, res) => {
@@ -95,8 +117,11 @@ router.post('/upload', async (req, res) => {
       added++;
     }
 
+    // Save updated clean data to local JSON file
+    await saveCleanDataLocally(pool);
+
     res.status(201).json({
-      message: `Upload complete`,
+      message: `Upload complete. Clean data saved to server/src/data/clean-data.json`,
       summary: {
         receivedRaw: messyData.students.length,
         afterCleaning: cleaned.students.length,
@@ -108,6 +133,21 @@ router.post('/upload', async (req, res) => {
   } catch (err) {
     console.error('Upload error:', err.message);
     res.status(500).json({ error: 'Failed to process upload' });
+  }
+});
+
+// GET /students/export — export full clean dataset from DB to local file and return it
+router.get('/export', async (req, res) => {
+  try {
+    const pool = getPool();
+    const cleanData = await saveCleanDataLocally(pool);
+    res.json({
+      message: `Exported ${cleanData.meta.total} students to clean-data.json`,
+      ...cleanData,
+    });
+  } catch (err) {
+    console.error('Export error:', err.message);
+    res.status(500).json({ error: 'Failed to export clean data' });
   }
 });
 
