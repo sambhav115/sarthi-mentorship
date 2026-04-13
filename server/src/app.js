@@ -19,15 +19,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// API Routes
-app.use('/api/auth', authRouter);
-app.use('/api/students', studentsRouter);
-app.use('/api/leads', leadsRouter);
-app.use('/api/reviews', reviewsRouter);
-app.use('/api/ai', aiRouter);
+// Routes (no /api prefix — as per assignment spec)
+app.use('/auth', authRouter);
+app.use('/students', studentsRouter);
+app.use('/leads', leadsRouter);
+app.use('/reviews', reviewsRouter);
+app.use('/ai', aiRouter);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
