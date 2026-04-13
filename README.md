@@ -9,24 +9,6 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 - **Mentor Login**: `ananya@sarrthi.com` / `12345`
 - **Student Login**: any student email from dataset / `12345` (e.g. `dhruv.rajan@example.com`)
 
-## Deploy Your Own
-
-### Backend (Render)
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sambhav115/sarthi-mentorship)
-
-After clicking, set these environment variables:
-- `DATABASE_URL` — your Supabase PostgreSQL connection string
-- `OPENAI_API_KEY` — your OpenAI API key
-- `CLIENT_URL` — your Vercel frontend URL
-- `CORS_ORIGIN` — same as CLIENT_URL
-
-### Frontend (Vercel)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sambhav115/sarthi-mentorship&root-directory=client&env=VITE_API_URL&envDescription=Your%20Render%20backend%20URL&envLink=https://github.com/sambhav115/sarthi-mentorship#deploy-your-own)
-
-Set `VITE_API_URL` to your Render backend URL (e.g. `https://your-app.onrender.com`).
-
 ## Tech Stack
 
 - **Frontend**: React (Vite), React Router
