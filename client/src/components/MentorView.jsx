@@ -142,51 +142,23 @@ function MentorView() {
     );
   }
 
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0 }}>Welcome, {mentor.name}</h2>
-        <button className="role-btn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+  // Student detail view (reviews + new review form)
+  if (selectedStudent) {
+    return (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <button className="role-btn" onClick={() => { setSelectedStudent(null); setAiSummary(null); }}>
+            &larr; Back to Students
+          </button>
+          <button className="role-btn" onClick={handleLogout}>Logout</button>
+        </div>
 
-      <h3>Students</h3>
-      <input
-        type="text"
-        placeholder="Search students by name or email..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={{
-          width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
-          borderRadius: '8px', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-h)',
-          marginBottom: '16px', outline: 'none', boxSizing: 'border-box',
-        }}
-      />
-      <div className="students-grid">
-        {students.filter(s =>
-          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.email.toLowerCase().includes(searchQuery.toLowerCase())
-        ).map(student => (
-          <div
-            className="student-card"
-            key={student.id}
-            style={{
-              cursor: 'pointer',
-              borderColor: selectedStudent?.id === student.id ? 'var(--accent)' : undefined,
-            }}
-            onClick={() => selectStudent(student)}
-          >
-            <h3>{student.name}</h3>
-            <p className="email">{student.email}</p>
-            <span className={`status ${student.status}`}>{student.status}</span>
-          </div>
-        ))}
-      </div>
+        <h2 style={{ textAlign: 'center', marginBottom: '4px' }}>{selectedStudent.name}</h2>
+        <p style={{ textAlign: 'center', color: 'var(--text)', marginBottom: '24px' }}>
+          {selectedStudent.email} &middot; <span className={`status ${selectedStudent.status}`}>{selectedStudent.status}</span>
+        </p>
 
-      {selectedStudent && (
-        <div style={{ marginTop: '32px' }}>
-          <h3>Session History for {selectedStudent.name}</h3>
+        <h3>Session History</h3>
 
           {pastLoading ? (
             <div className="skeleton card" />
@@ -275,8 +247,47 @@ function MentorView() {
               </button>
             </form>
           </div>
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  // Student list view
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2 style={{ margin: 0 }}>Welcome, {mentor.name}</h2>
+        <button className="role-btn" onClick={handleLogout}>Logout</button>
+      </div>
+
+      <h3>Students</h3>
+      <input
+        type="text"
+        placeholder="Search students by name or email..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{
+          width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
+          borderRadius: '8px', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-h)',
+          marginBottom: '16px', outline: 'none', boxSizing: 'border-box',
+        }}
+      />
+      <div className="students-grid">
+        {students.filter(s =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.email.toLowerCase().includes(searchQuery.toLowerCase())
+        ).map(student => (
+          <div
+            className="student-card"
+            key={student.id}
+            style={{ cursor: 'pointer' }}
+            onClick={() => selectStudent(student)}
+          >
+            <h3>{student.name}</h3>
+            <p className="email">{student.email}</p>
+            <span className={`status ${student.status}`}>{student.status}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
