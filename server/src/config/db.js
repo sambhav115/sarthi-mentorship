@@ -137,6 +137,7 @@ async function connectDB() {
       student_id VARCHAR(50) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) NOT NULL,
+      password VARCHAR(200),
       status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
       target_year VARCHAR(10) DEFAULT '2026',
       created_at TIMESTAMP DEFAULT NOW(),
@@ -186,14 +187,15 @@ async function connectDB() {
     // Seed students
     const cleaned = cleanStudentData(messyData);
     const targetYears = ['2026', '2026', '2026', '2027', '2027', '2028'];
+    const studentHash = await bcrypt.hash('12345', 10);
     for (let i = 0; i < cleaned.students.length; i++) {
       const s = cleaned.students[i];
       await p.query(
-        'INSERT INTO students (student_id, name, email, status, target_year) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING',
-        [s.id, s.name, s.email, s.status, targetYears[i % targetYears.length]]
+        'INSERT INTO students (student_id, name, email, password, status, target_year) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING',
+        [s.id, s.name, s.email, studentHash, s.status, targetYears[i % targetYears.length]]
       );
     }
-    console.log(`${cleaned.students.length} students seeded`);
+    console.log(`${cleaned.students.length} students seeded (password: 12345)`);
 
     // Seed reviews
     const { rows: activeStudents } = await p.query("SELECT * FROM students WHERE status = 'active'");

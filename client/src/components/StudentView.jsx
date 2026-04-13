@@ -1,43 +1,40 @@
 import { useState, useEffect } from 'react';
-import { getStudents, getReviews, summarizeAll } from '../services/api';
+import { getReviews, summarizeAll, getStudentMe } from '../services/api';
+import StudentLogin from './StudentLogin';
 
 function StudentView() {
-  const [students, setStudents] = useState([]);
-  const [selectedId, setSelectedId] = useState('');
+  const [student, setStudent] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const [aiSummary, setAiSummary] = useState(null);
   const [summarizing, setSummarizing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
+  // Check if already logged in
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const res = await getStudents();
-        setStudents(res.data.students);
-      } catch {
-        setError('Failed to load students.');
-      } finally {
-        setLoading(false);
+    const checkAuth = async () => {
+      const token = localStorage.getItem('student_token');
+      if (token) {
+        try {
+          const res = await getStudentMe();
+          setStudent(res.data.student);
+        } catch {
+          localStorage.removeItem('student_token');
+        }
       }
+      setAuthChecked(true);
     };
-    fetchStudents();
+    checkAuth();
   }, []);
 
+  // Fetch reviews once logged in
   useEffect(() => {
-    if (!selectedId) {
-      setReviews([]);
-      setAiSummary(null);
-      return;
-    }
+    if (!student) return;
     const fetchReviews = async () => {
       setReviewsLoading(true);
-      setAiSummary(null);
       try {
-        const res = await getReviews(selectedId);
+        const res = await getReviews(student.id);
         setReviews(res.data.reviews);
       } catch {
         setReviews([]);
@@ -46,13 +43,20 @@ function StudentView() {
       }
     };
     fetchReviews();
-  }, [selectedId]);
+  }, [student]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('student_token');
+    setStudent(null);
+    setReviews([]);
+    setAiSummary(null);
+  };
 
   const handleSummarizeAll = async () => {
     setSummarizing(true);
     setAiSummary(null);
     try {
-      const res = await summarizeAll(selectedId);
+      const res = await summarizeAll(student.id);
       setAiSummary(res.data);
     } catch {
       setAiSummary({ summary: 'Failed to generate summary. Try again.', totalSessions: 0 });
@@ -61,70 +65,38 @@ function StudentView() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="progress-section">
-        <div className="skeleton" style={{ width: '60%', height: '40px', margin: '0 auto 24px' }} />
-        {[1, 2].map(i => <div key={i} className="skeleton card" />)}
-      </div>
-    );
+  if (!authChecked) {
+    return <div className="skeleton card" style={{ maxWidth: '400px', margin: '40px auto' }} />;
   }
 
-  if (error) {
-    return <div className="error-state"><p>{error}</p></div>;
+  if (!student) {
+    return <StudentLogin onLogin={setStudent} />;
   }
-
-  const selectedStudent = students.find(s => s.id === selectedId);
 
   return (
     <div className="progress-section">
-      <div className="student-select-section">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '8px',
-            fontSize: '16px', background: 'var(--bg)', color: 'var(--text-h)',
-            marginBottom: '12px', width: '100%', maxWidth: '300px', outline: 'none', boxSizing: 'border-box',
-          }}
-        />
-        <br />
-        <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
-          <option value="">Select your profile</option>
-          {students.filter(s =>
-            s.name.toLowerCase().includes(searchQuery.toLowerCase())
-          ).map(s => (
-            <option key={s.id} value={s.id}>{s.name} ({s.id})</option>
-          ))}
-        </select>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2 style={{ margin: 0 }}>Welcome, {student.name}</h2>
+        <button className="role-btn" onClick={handleLogout}>Logout</button>
       </div>
 
-      {selectedStudent && (
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <h2>{selectedStudent.name}</h2>
-          <p>
-            {selectedStudent.email} &middot;{' '}
-            <span className={`status ${selectedStudent.status}`}>{selectedStudent.status}</span>
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <p>{student.email}</p>
+        {reviews.length > 0 && (
+          <p style={{ color: 'var(--text)', marginTop: '8px' }}>
+            {reviews.length} session(s) completed
           </p>
-          {reviews.length > 0 && (
-            <p style={{ color: 'var(--text)', marginTop: '8px' }}>
-              {reviews.length} session(s) completed
-            </p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       {reviewsLoading ? (
         <>
           {[1, 2].map(i => <div key={i} className="skeleton card" />)}
         </>
-      ) : selectedId && reviews.length === 0 ? (
+      ) : reviews.length === 0 ? (
         <p style={{ textAlign: 'center', color: 'var(--text)' }}>No sessions reviewed yet.</p>
-      ) : selectedId && reviews.length > 0 ? (
+      ) : (
         <>
-          {/* Single AI Summary button for ALL sessions */}
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <button
               className="ai-btn"
@@ -147,7 +119,6 @@ function StudentView() {
             </div>
           )}
 
-          {/* Chronological session reviews */}
           <h3 style={{ textAlign: 'center' }}>Session History</h3>
           {reviews.map(review => (
             <div className="review-card" key={review.id}>
@@ -166,7 +137,7 @@ function StudentView() {
             </div>
           ))}
         </>
-      ) : null}
+      )}
     </div>
   );
 }

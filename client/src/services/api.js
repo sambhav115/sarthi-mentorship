@@ -6,18 +6,22 @@ const API = axios.create({
 
 // Attach JWT token to every request if available
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('mentor_token');
+  const token = localStorage.getItem('mentor_token') || localStorage.getItem('student_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Auth
+// Mentor Auth
 export const login = (email, password) => API.post('/auth/login', { email, password });
 export const getMe = () => API.get('/auth/me');
 export const forgotPassword = (email) => API.post('/auth/forgot-password', { email });
 export const resetPassword = (token, newPassword) => API.post('/auth/reset-password', { token, newPassword });
+
+// Student Auth
+export const studentLogin = (email, password) => API.post('/auth/student/login', { email, password });
+export const getStudentMe = () => API.get('/auth/student/me');
 
 // Students
 export const getStudents = (search) => API.get('/students', { params: search ? { search } : {} });

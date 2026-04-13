@@ -25,7 +25,7 @@ async function saveCleanDataLocally(pool) {
   return cleanData;
 }
 
-// GET /students?search=rahul&status=active
+// GET /students
 router.get('/', async (req, res) => {
   try {
     const { search, status } = req.query;
