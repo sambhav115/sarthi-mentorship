@@ -82,30 +82,15 @@ router.post('/upload', async (req, res) => {
     for (let i = 0; i < cleaned.students.length; i++) {
       const s = cleaned.students[i];
 
-      // Check if student_id + email combo already exists
+      // Check if student_id already exists (skip duplicate)
       const { rows: existing } = await pool.query(
-        'SELECT student_id FROM students WHERE student_id = $1 AND email = $2',
-        [s.id, s.email]
+        'SELECT student_id FROM students WHERE student_id = $1',
+        [s.id]
       );
 
       if (existing.length > 0) {
         skipped++;
-        skippedRecords.push({ id: s.id, email: s.email, reason: 'Already exists' });
-        continue;
-      }
-
-      // Check if student_id exists with different email (conflict)
-      const { rows: idConflict } = await pool.query(
-        'SELECT student_id, email FROM students WHERE student_id = $1',
-        [s.id]
-      );
-
-      if (idConflict.length > 0) {
-        skipped++;
-        skippedRecords.push({
-          id: s.id, email: s.email,
-          reason: `ID already used by ${idConflict[0].email}`,
-        });
+        skippedRecords.push({ id: s.id, reason: 'Already exists' });
         continue;
       }
 
