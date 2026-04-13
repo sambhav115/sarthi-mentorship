@@ -9,6 +9,24 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 - **Mentor Login**: `ananya@sarrthi.com` / `12345`
 - **Student Login**: any student email from dataset / `12345` (e.g. `dhruv.rajan@example.com`)
 
+## Deploy Your Own
+
+### Backend (Render)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sambhav115/sarthi-mentorship)
+
+After clicking, set these environment variables:
+- `DATABASE_URL` — your Supabase PostgreSQL connection string
+- `OPENAI_API_KEY` — your OpenAI API key
+- `CLIENT_URL` — your Vercel frontend URL
+- `CORS_ORIGIN` — same as CLIENT_URL
+
+### Frontend (Vercel)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sambhav115/sarthi-mentorship&root-directory=client&env=VITE_API_URL&envDescription=Your%20Render%20backend%20URL&envLink=https://github.com/sambhav115/sarthi-mentorship#deploy-your-own)
+
+Set `VITE_API_URL` to your Render backend URL (e.g. `https://your-app.onrender.com`).
+
 ## Tech Stack
 
 - **Frontend**: React (Vite), React Router
@@ -16,7 +34,6 @@ A full-stack UPSC mentorship evaluation platform where mentors submit session re
 - **Database**: PostgreSQL (Supabase)
 - **AI**: OpenAI GPT-4o-mini
 - **Auth**: JWT + bcryptjs
-- **Email**: Nodemailer (Gmail SMTP)
 
 ## Project Structure
 
@@ -31,12 +48,12 @@ sarrthi/
 ├── client/              # React SPA
 │   └── src/
 │       ├── pages/       # MentorshipProgram, Dashboard, Leaderboard
-│       ├── components/  # MentorView, StudentView, MentorLogin
+│       ├── components/  # MentorView, StudentView, MentorLogin, StudentLogin
 │       └── services/    # API client (axios)
 └── docs/                # Data cleaning report, code refactor, system design
 ```
 
-## Setup & Run
+## Setup & Run Locally
 
 Requires: Node.js 18+
 
@@ -65,21 +82,23 @@ Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 | POST | /students/upload | Upload messy JSON, clean & append to DB |
 | GET | /students/export | Export clean data to local JSON file |
 | POST | /leads | Submit mentorship signup form |
-| POST | /auth/login | Mentor login (JWT) |
-| GET | /auth/me | Get current mentor |
-| POST | /auth/forgot-password | Send password reset email |
-| POST | /auth/reset-password | Reset password with token |
+| GET | /leads | Get all leads |
+| POST | /auth/login | Mentor login (returns JWT) |
+| GET | /auth/me | Get current logged-in mentor |
+| POST | /auth/student/login | Student login (returns JWT) |
+| GET | /auth/student/me | Get current logged-in student |
 | GET | /reviews/mentors | List all mentors |
 | POST | /reviews | Submit a session review |
 | GET | /reviews?studentId=X | Get reviews for a student |
 | POST | /ai/summarize-all | AI summary of all reviews for a student |
-| GET | /ai/leaderboard | Student rankings by performance score |
+| GET | /ai/leaderboard | Student leaderboard ranked by performance |
+| GET | /health | Health check |
 
 ## Phase Breakdown
 
 ### Phase 1: Messy API & Data Optimization
 - 115 messy records cleaned to 100 unique students
-- Removed duplicates (by id+email), standardized dates to ISO 8601, removed junk fields
+- Removed duplicates (by student_id), standardized dates to ISO 8601, removed junk fields
 - See [docs/data-cleaning-report.md](docs/data-cleaning-report.md)
 
 ### Phase 2: Website Page
@@ -87,10 +106,10 @@ Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 - Form submits to `POST /leads` with validation
 
 ### Phase 3: Dashboard
-- Mentor login with password authentication
-- **Mentor**: Search students, view session history, submit reviews
-- **Student**: View all reviews chronologically, AI summary of progress
-- Loading skeletons, error states, retry logic
+- Mentor and Student login with JWT authentication
+- **Mentor**: Search students, view session history, submit reviews, AI summary
+- **Student**: Login to view own reviews and AI progress summary
+- Loading skeletons, error states, back navigation
 
 ### Phase 4: AI Feature
 - "AI Summary of All Sessions" button
@@ -115,10 +134,8 @@ Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 ## Environment Variables
 
 ```
-DATABASE_URL=postgresql://...    # Supabase PostgreSQL connection
+DATABASE_URL=postgresql://...    # Supabase PostgreSQL connection string
 OPENAI_API_KEY=sk-...            # OpenAI API key
 JWT_SECRET=your_secret           # JWT signing secret
-GMAIL_USER=your@gmail.com        # For password reset emails
-GMAIL_APP_PASSWORD=xxxx          # Gmail app password
-CLIENT_URL=http://localhost:5173 # Frontend URL
+CLIENT_URL=http://localhost:5173 # Frontend URL (for CORS)
 ```
