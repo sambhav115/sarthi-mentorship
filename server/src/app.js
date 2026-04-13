@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const connectDB = require('./config/db');
+const { connectDB } = require('./config/db');
 const studentsRouter = require('./routes/students');
 const leadsRouter = require('./routes/leads');
 const reviewsRouter = require('./routes/reviews');
@@ -31,11 +31,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Start server FIRST (so Render detects the port), then connect MongoDB
+// Start server FIRST (so Render detects the port), then connect PostgreSQL
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   connectDB().catch((err) => {
-    console.error('MongoDB connection error:', err.message);
+    console.error('PostgreSQL connection error:', err.message);
   });
 });
 

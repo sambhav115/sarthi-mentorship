@@ -1,12 +1,16 @@
 services:
-  # MongoDB Database
-  mongo:
-    image: mongo:7
-    container_name: sarthi-mongo
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: sarthi-postgres
     ports:
-      - "27017:27017"
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sarthi
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
-      - mongo-data:/data/db
+      - pg-data:/var/lib/postgresql/data
     restart: unless-stopped
 
   # Express Backend
@@ -17,7 +21,7 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - MONGO_URI=mongodb://mongo:27017/sarthi
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/sarthi
       - JWT_SECRET=sarthi_mentorship_jwt_secret_2026
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GMAIL_USER=${GMAIL_USER:-}
@@ -25,7 +29,7 @@ services:
       - CLIENT_URL=http://localhost:3000
       - CORS_ORIGIN=http://localhost:3000
     depends_on:
-      - mongo
+      - postgres
     restart: unless-stopped
 
   # React Frontend
@@ -42,4 +46,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongo-data:
+  pg-data:

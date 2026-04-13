@@ -1,78 +1,89 @@
 const express = require('express');
 const router = express.Router();
-const Review = require('../models/Review');
-const Mentor = require('../models/Mentor');
+const { getPool } = require('../config/db');
 
-// GET /api/reviews/mentors — list all mentors (public info only)
+// GET /api/reviews/mentors
 router.get('/mentors', async (req, res) => {
   try {
-    const mentors = await Mentor.find({}, 'mentorId name email');
-    res.json({ mentors: mentors.map(m => ({ id: m.mentorId, name: m.name, email: m.email })) });
+    const pool = getPool();
+    const { rows } = await pool.query('SELECT mentor_id, name, email FROM mentors');
+    res.json({ mentors: rows.map(m => ({ id: m.mentor_id, name: m.name, email: m.email })) });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch mentors' });
   }
 });
 
-// POST /api/reviews — mentor submits a session review
+// POST /api/reviews
 router.post('/', async (req, res) => {
   const { studentId, mentorId, rating, comment } = req.body;
-
   if (!studentId || !mentorId || !rating || !comment) {
     return res.status(400).json({ error: 'All fields are required: studentId, mentorId, rating, comment' });
   }
-
   if (rating < 1 || rating > 5) {
     return res.status(400).json({ error: 'Rating must be between 1 and 5' });
   }
 
   try {
-    const mentor = await Mentor.findOne({ mentorId });
-    if (!mentor) {
-      return res.status(400).json({ error: 'Invalid mentorId' });
-    }
+    const pool = getPool();
+    const { rows: mentorRows } = await pool.query('SELECT * FROM mentors WHERE mentor_id = $1', [mentorId]);
+    if (mentorRows.length === 0) return res.status(400).json({ error: 'Invalid mentorId' });
 
-    // Auto-increment session number per student
-    const sessionCount = await Review.countDocuments({ studentId });
-    const sessionNumber = sessionCount + 1;
+    const { rows: countRows } = await pool.query('SELECT COUNT(*) FROM reviews WHERE student_id = $1', [studentId]);
+    const sessionNumber = parseInt(countRows[0].count) + 1;
 
-    const review = await Review.create({
-      studentId,
-      mentorId,
-      mentorName: mentor.name,
-      sessionNumber,
-      rating: Number(rating),
-      comment,
+    const { rows } = await pool.query(
+      'INSERT INTO reviews (student_id, mentor_id, mentor_name, session_number, rating, comment) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [studentId, mentorId, mentorRows[0].name, sessionNumber, rating, comment]
+    );
+
+    const r = rows[0];
+    res.status(201).json({
+      message: `Session #${sessionNumber} review submitted`,
+      review: { id: r.id, studentId: r.student_id, mentorId: r.mentor_id, mentorName: r.mentor_name, sessionNumber: r.session_number, rating: r.rating, comment: r.comment, createdAt: r.created_at },
     });
-
-    res.status(201).json({ message: `Session #${sessionNumber} review submitted`, review });
   } catch (err) {
+    console.error('Review error:', err.message);
     res.status(500).json({ error: 'Failed to submit review' });
   }
 });
 
-// GET /api/reviews?studentId=stu_001 — get reviews for a student (chronological)
+// GET /api/reviews?studentId=stu_001
 router.get('/', async (req, res) => {
-  const { studentId } = req.query;
-
   try {
-    const filter = studentId ? { studentId } : {};
-    const reviews = await Review.find(filter).sort({ createdAt: 1 });
-    res.json({ reviews, total: reviews.length });
+    const pool = getPool();
+    const { studentId } = req.query;
+    let query = 'SELECT * FROM reviews';
+    const params = [];
+    if (studentId) {
+      params.push(studentId);
+      query += ' WHERE student_id = $1';
+    }
+    query += ' ORDER BY created_at ASC';
+
+    const { rows } = await pool.query(query, params);
+    res.json({
+      reviews: rows.map(r => ({
+        id: r.id, studentId: r.student_id, mentorId: r.mentor_id, mentorName: r.mentor_name,
+        sessionNumber: r.session_number, rating: r.rating, comment: r.comment, createdAt: r.created_at,
+      })),
+      total: rows.length,
+    });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 });
 
-// GET /api/reviews/latest/:studentId — get the latest review for a student
+// GET /api/reviews/latest/:studentId
 router.get('/latest/:studentId', async (req, res) => {
   try {
-    const review = await Review.findOne({ studentId: req.params.studentId }).sort({ createdAt: -1 });
-
-    if (!review) {
-      return res.status(404).json({ error: 'No reviews found for this student' });
-    }
-
-    res.json(review);
+    const pool = getPool();
+    const { rows } = await pool.query(
+      'SELECT * FROM reviews WHERE student_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [req.params.studentId]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'No reviews found for this student' });
+    const r = rows[0];
+    res.json({ id: r.id, studentId: r.student_id, mentorId: r.mentor_id, mentorName: r.mentor_name, sessionNumber: r.session_number, rating: r.rating, comment: r.comment, createdAt: r.created_at });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch review' });
   }
