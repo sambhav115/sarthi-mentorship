@@ -180,7 +180,7 @@ async function connectDB() {
     const defaultHash = await bcrypt.hash('12345', 10);
     await p.query(
       'INSERT INTO mentors (mentor_id, name, email, password) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
-      ['mentor_001', 'Dr. Ananya Gupta', 'ananya@sarthi.com', defaultHash]
+      ['mentor_001', 'Dr. Ananya Gupta', 'ananya@sarrthi.com', defaultHash]
     );
     console.log('Mentor seeded: Dr. Ananya Gupta (password: 12345)');
 

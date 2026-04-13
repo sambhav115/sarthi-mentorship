@@ -128,7 +128,7 @@ function MentorshipProgram() {
       </section>
 
       <footer className="footer">
-        Sarthi Mentorship Program &copy; 2026
+        Sarrthi Mentorship Program &copy; 2026
       </footer>
     </div>
   );

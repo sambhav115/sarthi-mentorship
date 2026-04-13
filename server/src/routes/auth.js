@@ -73,9 +73,9 @@ router.post('/forgot-password', async (req, res) => {
     if (transporter) {
       try {
         await transporter.sendMail({
-          from: `"Sarthi Mentorship" <${process.env.GMAIL_USER}>`,
+          from: `"Sarrthi Mentorship" <${process.env.GMAIL_USER}>`,
           to: mentor.email,
-          subject: 'Password Reset — Sarthi Mentorship',
+          subject: 'Password Reset — Sarrthi Mentorship',
           html: `<div style="font-family:Arial;max-width:500px;margin:0 auto"><h2 style="color:#aa3bff">Password Reset</h2><p>Hi ${mentor.name},</p><p>You requested a password reset.</p><a href="${resetLink}" style="display:inline-block;padding:12px 24px;background:#aa3bff;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0">Reset Password</a><p style="color:#666;font-size:14px">This link expires in 15 minutes.</p></div>`,
         });
       } catch (e) {

@@ -71,7 +71,7 @@ curl -X POST http://localhost:5000/students/upload \
 ```bash
 curl -X POST http://localhost:5000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "ananya@sarthi.com", "password": "12345"}'
+  -d '{"email": "ananya@sarrthi.com", "password": "12345"}'
 ```
 
 ### Get Current Mentor (with token)
@@ -84,7 +84,7 @@ curl http://localhost:5000/auth/me \
 ```bash
 curl -X POST http://localhost:5000/auth/forgot-password \
   -H "Content-Type: application/json" \
-  -d '{"email": "ananya@sarthi.com"}'
+  -d '{"email": "ananya@sarrthi.com"}'
 ```
 
 ### Reset Password
@@ -171,17 +171,17 @@ curl "http://localhost:5000/ai/leaderboard?search=rahul&targetYear=2026"
 
 ### Backend (Render)
 ```bash
-curl https://sarthi-mentorship.onrender.com/health
-curl https://sarthi-mentorship.onrender.com/students
-curl https://sarthi-mentorship.onrender.com/ai/leaderboard
+curl https://sarrthi-mentorship.onrender.com/health
+curl https://sarrthi-mentorship.onrender.com/students
+curl https://sarrthi-mentorship.onrender.com/ai/leaderboard
 ```
 
 ### Frontend (Vercel)
 ```
-https://sarthi-mentorship.vercel.app
-https://sarthi-mentorship.vercel.app/dashboard
-https://sarthi-mentorship.vercel.app/leaderboard
-https://sarthi-mentorship.vercel.app/mentorship-program
+https://sarrthi-mentorship.vercel.app
+https://sarrthi-mentorship.vercel.app/dashboard
+https://sarrthi-mentorship.vercel.app/leaderboard
+https://sarrthi-mentorship.vercel.app/mentorship-program
 ```
 
 ---
@@ -257,14 +257,14 @@ CLIENT_URL=http://localhost:5173
 
 ### Vercel (Frontend)
 ```
-VITE_API_URL=https://sarthi-mentorship.onrender.com
+VITE_API_URL=https://sarrthi-mentorship.onrender.com
 ```
 
 ### Render (Backend)
 ```
 DATABASE_URL=postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres
-JWT_SECRET=sarthi_mentorship_jwt_secret_2026
+JWT_SECRET=sarrthi_mentorship_jwt_secret_2026
 OPENAI_API_KEY=your_key
-CLIENT_URL=https://sarthi-mentorship.vercel.app
-CORS_ORIGIN=https://sarthi-mentorship.vercel.app
+CLIENT_URL=https://sarrthi-mentorship.vercel.app
+CORS_ORIGIN=https://sarrthi-mentorship.vercel.app
 ```

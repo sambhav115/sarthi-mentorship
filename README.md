@@ -1,4 +1,4 @@
-# Sarthi - Mini Mentorship Evaluation System
+# Sarrthi - Mini Mentorship Evaluation System
 
 A full-stack UPSC mentorship evaluation platform where mentors submit session reviews, students view progress, and AI summarizes feedback.
 
