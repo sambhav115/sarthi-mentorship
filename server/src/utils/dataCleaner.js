@@ -17,11 +17,12 @@ function cleanStudentData(rawData) {
     },
   };
 
-  // Deduplicate by student id, keeping the first occurrence
-  const seen = new Map();
+  // Deduplicate by student id + email combination, keeping the first occurrence
+  const seen = new Set();
 
   for (const student of rawData.students) {
-    if (seen.has(student.id)) continue;
+    const uniqueKey = `${student.id}::${student.email}`;
+    if (seen.has(uniqueKey)) continue;
 
     // Standardize: pick created_at, drop the duplicate createdAt field
     const dateSource = student.created_at || student.createdAt;
@@ -34,7 +35,7 @@ function cleanStudentData(rawData) {
       status: student.status,
     };
 
-    seen.set(student.id, true);
+    seen.add(uniqueKey);
     cleaned.students.push(cleanStudent);
   }
 
