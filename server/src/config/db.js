@@ -128,8 +128,6 @@ async function connectDB() {
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
       password VARCHAR(200) NOT NULL,
-      reset_token TEXT,
-      reset_token_expiry TIMESTAMP,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );

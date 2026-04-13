@@ -16,8 +16,6 @@ API.interceptors.request.use((config) => {
 // Mentor Auth
 export const login = (email, password) => API.post('/auth/login', { email, password });
 export const getMe = () => API.get('/auth/me');
-export const forgotPassword = (email) => API.post('/auth/forgot-password', { email });
-export const resetPassword = (token, newPassword) => API.post('/auth/reset-password', { token, newPassword });
 
 // Student Auth
 export const studentLogin = (email, password) => API.post('/auth/student/login', { email, password });
