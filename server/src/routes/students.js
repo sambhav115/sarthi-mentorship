@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { getPool } = require('../config/db');
+const { cleanStudentData } = require('../utils/dataCleaner');
 
-// GET /api/students?search=rahul&status=active
+// GET /students?search=rahul&status=active
 router.get('/', async (req, res) => {
   try {
     const { search, status } = req.query;
@@ -34,7 +35,83 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/students/:id
+// POST /students/upload — upload messy JSON, clean it, append new students to DB
+router.post('/upload', async (req, res) => {
+  try {
+    const messyData = req.body;
+
+    // Validate input format
+    if (!messyData || !Array.isArray(messyData.students) || messyData.students.length === 0) {
+      return res.status(400).json({
+        error: 'Invalid format. Expected: { "students": [...] }',
+      });
+    }
+
+    // Clean the messy data
+    const cleaned = cleanStudentData(messyData);
+
+    const pool = getPool();
+    let added = 0;
+    let skipped = 0;
+    const skippedRecords = [];
+
+    const targetYears = ['2026', '2026', '2026', '2027', '2027', '2028'];
+
+    for (let i = 0; i < cleaned.students.length; i++) {
+      const s = cleaned.students[i];
+
+      // Check if student_id + email combo already exists
+      const { rows: existing } = await pool.query(
+        'SELECT student_id FROM students WHERE student_id = $1 AND email = $2',
+        [s.id, s.email]
+      );
+
+      if (existing.length > 0) {
+        skipped++;
+        skippedRecords.push({ id: s.id, email: s.email, reason: 'Already exists' });
+        continue;
+      }
+
+      // Check if student_id exists with different email (conflict)
+      const { rows: idConflict } = await pool.query(
+        'SELECT student_id, email FROM students WHERE student_id = $1',
+        [s.id]
+      );
+
+      if (idConflict.length > 0) {
+        skipped++;
+        skippedRecords.push({
+          id: s.id, email: s.email,
+          reason: `ID already used by ${idConflict[0].email}`,
+        });
+        continue;
+      }
+
+      // Insert new student
+      await pool.query(
+        'INSERT INTO students (student_id, name, email, status, target_year) VALUES ($1, $2, $3, $4, $5)',
+        [s.id, s.name, s.email, s.status, targetYears[i % targetYears.length]]
+      );
+      added++;
+    }
+
+    res.status(201).json({
+      message: `Upload complete`,
+      summary: {
+        receivedRaw: messyData.students.length,
+        afterCleaning: cleaned.students.length,
+        newlyAdded: added,
+        skippedDuplicates: skipped,
+      },
+      skippedRecords: skippedRecords.length > 0 ? skippedRecords : undefined,
+    });
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    res.status(500).json({ error: 'Failed to process upload' });
+  }
+});
+
+// GET /students/:id
 router.get('/:id', async (req, res) => {
   try {
     const pool = getPool();
