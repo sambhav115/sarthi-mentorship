@@ -21,7 +21,6 @@ export const resetPassword = (token, newPassword) => API.post('/auth/reset-passw
 
 // Students
 export const getStudents = (search) => API.get('/students', { params: search ? { search } : {} });
-export const getStudent = (id) => API.get(`/students/${id}`);
 
 // Mentors
 export const getMentors = () => API.get('/reviews/mentors');
@@ -32,10 +31,8 @@ export const submitLead = (data) => API.post('/leads', data);
 // Reviews
 export const submitReview = (data) => API.post('/reviews', data);
 export const getReviews = (studentId) => API.get(`/reviews?studentId=${studentId}`);
-export const getLatestReview = (studentId) => API.get(`/reviews/latest/${studentId}`);
 
 // AI
-export const summarizeReview = (reviewText) => API.post('/ai/summarize', { reviewText });
 export const summarizeAll = (studentId) => API.post('/ai/summarize-all', { studentId });
 export const getLeaderboard = (params) => API.get('/ai/leaderboard', { params });
 

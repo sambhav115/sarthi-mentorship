@@ -73,20 +73,4 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/reviews/latest/:studentId
-router.get('/latest/:studentId', async (req, res) => {
-  try {
-    const pool = getPool();
-    const { rows } = await pool.query(
-      'SELECT * FROM reviews WHERE student_id = $1 ORDER BY created_at DESC LIMIT 1',
-      [req.params.studentId]
-    );
-    if (rows.length === 0) return res.status(404).json({ error: 'No reviews found for this student' });
-    const r = rows[0];
-    res.json({ id: r.id, studentId: r.student_id, mentorId: r.mentor_id, mentorName: r.mentor_name, sessionNumber: r.session_number, rating: r.rating, comment: r.comment, createdAt: r.created_at });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch review' });
-  }
-});
-
 module.exports = router;

@@ -3,42 +3,7 @@ const OpenAI = require('openai');
 const router = express.Router();
 const { getPool } = require('../config/db');
 
-// POST /api/ai/summarize
-router.post('/summarize', async (req, res) => {
-  const { reviewText } = req.body;
-  if (!reviewText || reviewText.trim().length === 0) {
-    return res.status(400).json({ error: 'reviewText is required' });
-  }
-
-  try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return res.json({ summary: generateFallbackSummary(reviewText), source: 'fallback' });
-    }
-
-    const openai = new OpenAI({ apiKey });
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are a mentorship evaluation assistant. Convert mentor reviews into exactly 3 concise, actionable bullet points that a student can immediately act on. Each bullet should start with a verb. Return only the 3 bullet points, one per line, prefixed with "- ".' },
-        { role: 'user', content: `Review:\n${reviewText}` },
-      ],
-      max_tokens: 200,
-      temperature: 0.7,
-    });
-
-    const text = completion.choices[0]?.message?.content;
-    if (!text) throw new Error('Empty response');
-
-    const bullets = text.split('\n').filter(l => l.trim().startsWith('-')).slice(0, 3).map(l => l.trim());
-    res.json({ summary: bullets, source: 'openai' });
-  } catch (error) {
-    console.error('AI summarization error:', error.message);
-    res.json({ summary: generateFallbackSummary(reviewText), source: 'fallback' });
-  }
-});
-
-// POST /api/ai/summarize-all
+// POST /ai/summarize-all
 router.post('/summarize-all', async (req, res) => {
   const { studentId } = req.body;
   if (!studentId) return res.status(400).json({ error: 'studentId is required' });

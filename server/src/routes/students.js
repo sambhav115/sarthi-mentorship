@@ -151,17 +151,4 @@ router.get('/export', async (req, res) => {
   }
 });
 
-// GET /students/:id
-router.get('/:id', async (req, res) => {
-  try {
-    const pool = getPool();
-    const { rows } = await pool.query('SELECT * FROM students WHERE student_id = $1', [req.params.id]);
-    if (rows.length === 0) return res.status(404).json({ error: 'Student not found' });
-    const s = rows[0];
-    res.json({ id: s.student_id, name: s.name, email: s.email, status: s.status, targetYear: s.target_year, createdAt: s.created_at });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch student' });
-  }
-});
-
 module.exports = router;

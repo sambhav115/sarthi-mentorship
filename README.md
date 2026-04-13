@@ -61,7 +61,6 @@ Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /students | Get cleaned student list (search, filter) |
-| GET | /students/:id | Get single student |
 | POST | /students/upload | Upload messy JSON, clean & append to DB |
 | GET | /students/export | Export clean data to local JSON file |
 | POST | /leads | Submit mentorship signup form |
@@ -72,8 +71,6 @@ Backend runs on `http://localhost:5000`, frontend on `http://localhost:5173`.
 | GET | /reviews/mentors | List all mentors |
 | POST | /reviews | Submit a session review |
 | GET | /reviews?studentId=X | Get reviews for a student |
-| GET | /reviews/latest/:studentId | Get latest review |
-| POST | /ai/summarize | AI summary of single review |
 | POST | /ai/summarize-all | AI summary of all reviews for a student |
 | GET | /ai/leaderboard | Student rankings by performance score |
 
